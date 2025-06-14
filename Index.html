@@ -1,0 +1,1788 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gail Absensi App</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Flatpickr CSS (Date Picker) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    
+    <style>
+        /* Custom styles to complement Tailwind CSS */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* gray-50 */
+        }
+        
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Styles for the custom modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            -webkit-animation-name: fadeIn;
+            animation-name: fadeIn;
+            -webkit-animation-duration: 0.3s;
+            animation-duration: 0.3s;
+        }
+
+        .modal-content {
+            position: relative;
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            -webkit-animation-name: slideIn;
+            animation-name: slideIn;
+            -webkit-animation-duration: 0.3s;
+            animation-duration: 0.3s;
+        }
+        
+        @-webkit-keyframes fadeIn { from {opacity: 0} to {opacity: 1} }
+        @keyframes fadeIn { from {opacity: 0} to {opacity: 1} }
+
+        @-webkit-keyframes slideIn { from {top: -100px; opacity: 0} to {top: 0; opacity: 1} }
+        @keyframes slideIn { from {top: -100px; opacity: 0} to {top: 0; opacity: 1} }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: #000;
+        }
+
+        /* Custom styling for Flatpickr date picker */
+        .flatpickr-calendar {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+        }
+        
+        /* Print styles */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #report-output, #report-output * {
+                visibility: visible;
+            }
+            #report-output {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="relative min-h-screen lg:flex">
+        <!-- Mobile Sidebar Overlay -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar" class="bg-white text-gray-800 w-64 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out z-30 flex flex-col shadow-lg">
+            <div class="flex items-center justify-center p-6 border-b">
+                <i class="fas fa-school text-2xl text-cyan-600"></i>
+                <h1 class="ml-3 text-xl font-bold text-gray-700">Gail Absensi App</h1>
+            </div>
+            <nav class="flex-1 px-4 py-4 space-y-2">
+                <a href="#" data-tab="dashboard" class="nav-link active flex items-center px-4 py-2 text-gray-700 hover:bg-cyan-50 hover:text-cyan-600 rounded-md transition-colors">
+                    <i class="fas fa-tachometer-alt w-5 text-center"></i>
+                    <span class="ml-4">Dashboard</span>
+                </a>
+                <a href="#" data-tab="students" class="nav-link flex items-center px-4 py-2 text-gray-700 hover:bg-cyan-50 hover:text-cyan-600 rounded-md transition-colors">
+                    <i class="fas fa-users w-5 text-center"></i>
+                    <span class="ml-4">Data Siswa</span>
+                </a>
+                <a href="#" data-tab="attendance" class="nav-link flex items-center px-4 py-2 text-gray-700 hover:bg-cyan-50 hover:text-cyan-600 rounded-md transition-colors">
+                    <i class="fas fa-clipboard-check w-5 text-center"></i>
+                    <span class="ml-4">Absensi</span>
+                </a>
+                <a href="#" data-tab="grades" class="nav-link flex items-center px-4 py-2 text-gray-700 hover:bg-cyan-50 hover:text-cyan-600 rounded-md transition-colors">
+                    <i class="fas fa-award w-5 text-center"></i>
+                    <span class="ml-4">Nilai</span>
+                </a>
+                 <a href="#" data-tab="reports" class="nav-link flex items-center px-4 py-2 text-gray-700 hover:bg-cyan-50 hover:text-cyan-600 rounded-md transition-colors">
+                    <i class="fas fa-chart-line w-5 text-center"></i>
+                    <span class="ml-4">Laporan</span>
+                </a>
+                <a href="#" data-tab="settings" class="nav-link flex items-center px-4 py-2 text-gray-700 hover:bg-cyan-50 hover:text-cyan-600 rounded-md transition-colors">
+                    <i class="fas fa-cog w-5 text-center"></i>
+                    <span class="ml-4">Pengaturan</span>
+                </a>
+                <a href="#" data-tab="import" class="nav-link flex items-center px-4 py-2 text-gray-700 hover:bg-cyan-50 hover:text-cyan-600 rounded-md transition-colors">
+                    <i class="fas fa-file-import w-5 text-center"></i>
+                    <span class="ml-4">Import Data</span>
+                </a>
+            </nav>
+            <div class="p-4 border-t">
+                <p class="text-xs text-gray-500">UID: <span id="userId" class="font-mono"></span></p>
+                <p class="text-xs text-gray-500">App ID: <span id="appId" class="font-mono"></span></p>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col lg:ml-64">
+            <!-- Top Bar for Mobile -->
+            <header class="bg-white shadow-md p-4 flex justify-between items-center lg:hidden">
+                <button id="hamburger-btn" class="text-gray-700 focus:outline-none">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <h1 class="text-lg font-bold text-gray-700">Gail Absensi App</h1>
+                 <div class="w-8"></div> <!-- Spacer -->
+            </header>
+
+            <main class="flex-1 p-4 sm:p-6 lg:p-8">
+                <!-- Dashboard Content -->
+                <div id="dashboard-content" class="tab-content">
+                    <h2 class="text-2xl lg:text-3xl font-bold text-gray-800 mb-6">Dashboard</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
+                            <i class="fas fa-users text-4xl text-blue-500"></i>
+                            <div class="ml-4">
+                                <p class="text-gray-500">Total Siswa</p>
+                                <p id="totalStudents" class="text-3xl font-bold">0</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
+                            <i class="fas fa-user-check text-4xl text-green-500"></i>
+                            <div class="ml-4">
+                                <p class="text-gray-500">Kehadiran Hari Ini</p>
+                                <p id="todayAttendance" class="text-3xl font-bold">0%</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
+                            <i class="fas fa-calendar-day text-4xl text-cyan-500"></i>
+                            <div class="ml-4">
+                                <p class="text-gray-500">Tanggal</p>
+                                <p id="currentDate" class="text-xl lg:text-2xl font-bold"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Students Content -->
+                <div id="students-content" class="tab-content hidden">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                        <h2 class="text-2xl lg:text-3xl font-bold text-gray-800">Data Siswa</h2>
+                        <div class="flex items-center gap-4 w-full sm:w-auto">
+                            <select id="studentFilterClass" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500">
+                                <option value="all">Semua Kelas</option>
+                            </select>
+                            <button id="addStudentBtn" class="bg-cyan-600 text-white px-4 py-2 rounded-lg hover:bg-cyan-700 transition flex items-center shadow-sm whitespace-nowrap">
+                                <i class="fas fa-plus mr-2"></i> Tambah
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bg-white p-2 sm:p-6 rounded-lg shadow-md overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="border-b">
+                                    <th class="p-4">Nama Siswa</th>
+                                    <th class="p-4">NISN</th>
+                                    <th class="p-4">Kelas</th>
+                                    <th class="p-4">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentTableBody">
+                               <!-- Student rows will be injected here -->
+                               <tr id="loadingStudents">
+                                   <td colspan="4" class="text-center p-8 text-gray-500">Memuat data siswa...</td>
+                               </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Attendance Content -->
+                <div id="attendance-content" class="tab-content hidden">
+                    <h2 class="text-2xl lg:text-3xl font-bold text-gray-800 mb-6">Absensi Siswa</h2>
+                     <div class="bg-white p-6 rounded-lg shadow-md">
+                        <div class="flex flex-wrap items-end gap-4 mb-6">
+                             <div>
+                                <label for="attendanceDate" class="block text-sm font-medium text-gray-700">Tanggal</label>
+                                <input type="text" id="attendanceDate" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500">
+                            </div>
+                            <div>
+                                <label for="attendanceClass" class="block text-sm font-medium text-gray-700">Kelas</label>
+                                <select id="attendanceClass" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500"></select>
+                            </div>
+                            <div>
+                                <label for="attendanceSubject" class="block text-sm font-medium text-gray-700">Mata Pelajaran</label>
+                                <select id="attendanceSubject" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500"></select>
+                            </div>
+                             <button id="loadAttendanceBtn" class="bg-cyan-600 text-white px-4 py-2 rounded-lg hover:bg-cyan-700 transition shadow-sm">Tampilkan</button>
+                        </div>
+                        <div id="attendanceList">
+                            <!-- Attendance list will be injected here -->
+                        </div>
+                         <div class="mt-6 text-right">
+                             <button id="saveAttendanceBtn" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition shadow-sm hidden">Simpan Absensi</button>
+                         </div>
+                    </div>
+                </div>
+
+                <!-- Grades Content -->
+                <div id="grades-content" class="tab-content hidden">
+                    <h2 class="text-2xl lg:text-3xl font-bold text-gray-800 mb-6">Manajemen Nilai</h2>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                         <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
+                             <div class="w-full sm:w-auto">
+                                <label for="gradeClass" class="block text-sm font-medium text-gray-700">Pilih Kelas</label>
+                                <select id="gradeClass" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500"></select>
+                            </div>
+                             <div class="w-full sm:w-auto">
+                                <label for="gradeStudent" class="block text-sm font-medium text-gray-700">Pilih Siswa</label>
+                                <select id="gradeStudent" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500"></select>
+                            </div>
+                         </div>
+                         <div id="gradeManagementSection" class="hidden">
+                             <h3 id="selectedStudentForGrade" class="text-xl font-semibold mb-4"></h3>
+                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Form input nilai -->
+                                <div>
+                                    <h4 class="font-semibold text-lg mb-2">Input Nilai Baru</h4>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label for="gradeSubject" class="block text-sm font-medium text-gray-700">Mata Pelajaran</label>
+                                            <select id="gradeSubject" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></select>
+                                        </div>
+                                        <div>
+                                            <label for="gradeType" class="block text-sm font-medium text-gray-700">Jenis Nilai</label>
+                                            <input type="text" id="gradeType" placeholder="Contoh: Ulangan Harian 1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                        </div>
+                                        <div>
+                                            <label for="gradeValue" class="block text-sm font-medium text-gray-700">Nilai</p>
+                                            <input type="number" id="gradeValue" min="0" max="100" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                        </div>
+                                        <button id="saveGradeBtn" class="bg-cyan-600 text-white px-4 py-2 rounded-lg hover:bg-cyan-700 transition shadow-sm">Simpan Nilai</button>
+                                    </div>
+                                </div>
+                                <!-- Tabel nilai -->
+                                <div>
+                                    <h4 class="font-semibold text-lg mb-2">Daftar Nilai</h4>
+                                    <div class="max-h-96 overflow-y-auto">
+                                        <table class="w-full text-left">
+                                            <thead class="sticky top-0 bg-gray-50">
+                                                <tr class="border-b">
+                                                    <th class="p-2">Mapel</th>
+                                                    <th class="p-2">Jenis</th>
+                                                    <th class="p-2">Nilai</th>
+                                                    <th class="p-2">Aksi</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="gradesTableBody">
+                                                <!-- Grades will be populated here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                             </div>
+                         </div>
+                    </div>
+                </div>
+                
+                <!-- Reports Content -->
+                <div id="reports-content" class="tab-content hidden">
+                    <h2 class="text-2xl lg:text-3xl font-bold text-gray-800 mb-6">Laporan & Analisis</h2>
+                    <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-end">
+                            <div class="lg:col-span-3">
+                                <label for="reportType" class="block text-sm font-medium text-gray-700">Jenis Laporan / Analisis</label>
+                                <select id="reportType" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                    <optgroup label="Laporan Tabel">
+                                        <option value="attendance_class">Absensi per Kelas</option>
+                                        <option value="attendance_student">Absensi per Siswa</option>
+                                        <option value="grades_class">Nilai per Kelas</option>
+                                        <option value="grades_student">Nilai per Siswa</option>
+                                    </optgroup>
+                                    <optgroup label="Analisis Data">
+                                         <option value="attendance_analysis">Analisis Absensi Kelas</option>
+                                         <option value="grades_analysis">Analisis Nilai Kelas</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            
+                            <!-- Filters Container -->
+                            <div id="report-filters-container" class="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-end">
+                                <!-- Class Filter -->
+                                <div id="filter-class-container" class="hidden">
+                                    <label for="reportClass" class="block text-sm font-medium text-gray-700">Kelas</label>
+                                    <select id="reportClass" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></select>
+                                </div>
+                                <!-- Student Filter -->
+                                <div id="filter-student-container" class="hidden">
+                                    <label for="reportStudent" class="block text-sm font-medium text-gray-700">Siswa</label>
+                                    <select id="reportStudent" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></select>
+                                </div>
+                                <!-- Date Range Filter -->
+                                <div id="filter-date-range-container" class="hidden md:col-span-2 grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="reportStartDate" class="block text-sm font-medium text-gray-700">Tanggal Mulai</label>
+                                        <input type="text" id="reportStartDate" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                    </div>
+                                    <div>
+                                        <label for="reportEndDate" class="block text-sm font-medium text-gray-700">Tanggal Selesai</label>
+                                        <input type="text" id="reportEndDate" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="lg:col-span-3">
+                                <button id="generateReportBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition w-full flex items-center justify-center">
+                                    <i class="fas fa-cogs mr-2"></i> Buat Laporan / Analisis
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="report-output-container" class="bg-white p-6 rounded-lg shadow-md hidden">
+                         <div class="flex flex-wrap justify-between items-center mb-4 gap-4">
+                            <h3 id="reportTitleHeader" class="text-xl font-bold text-gray-700">Hasil</h3>
+                            <div id="export-buttons-container" class="flex items-center gap-2">
+                                <button id="printReportBtn" class="bg-gray-600 text-white px-3 py-2 text-sm rounded-lg hover:bg-gray-700 transition flex items-center">
+                                    <i class="fas fa-print mr-2"></i> Cetak
+                                </button>
+                                <button id="exportExcelBtn" class="bg-green-600 text-white px-3 py-2 text-sm rounded-lg hover:bg-green-700 transition flex items-center">
+                                    <i class="fas fa-file-excel mr-2"></i> Excel
+                                </button>
+                                <button id="exportPdfBtn" class="bg-red-600 text-white px-3 py-2 text-sm rounded-lg hover:bg-red-700 transition flex items-center">
+                                    <i class="fas fa-file-pdf mr-2"></i> PDF
+                                </button>
+                            </div>
+                        </div>
+                        <div id="report-output" class="prose max-w-none">
+                            <!-- Report content will be injected here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Content -->
+                <div id="settings-content" class="tab-content hidden">
+                     <h2 class="text-2xl lg:text-3xl font-bold text-gray-800 mb-6">Pengaturan</h2>
+                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Teachers & Subjects -->
+                        <div class="space-y-8">
+                            <!-- Teacher Management -->
+                            <div class="bg-white p-6 rounded-lg shadow-md">
+                                 <h3 class="text-xl font-semibold mb-4">Manajemen Guru</h3>
+                                 <form id="addTeacherForm" class="flex gap-4 mb-4">
+                                    <input type="text" id="teacherName" placeholder="Nama Guru Baru" class="flex-grow block w-full rounded-md border-gray-300 shadow-sm" required>
+                                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">Tambah</button>
+                                 </form>
+                                 <ul id="teacherList" class="space-y-2"></ul>
+                            </div>
+                             <!-- Subject Management -->
+                            <div class="bg-white p-6 rounded-lg shadow-md">
+                                 <h3 class="text-xl font-semibold mb-4">Manajemen Mata Pelajaran</h3>
+                                 <form id="addSubjectForm" class="flex gap-4 mb-4">
+                                    <input type="text" id="subjectName" placeholder="Mata Pelajaran Baru" class="flex-grow block w-full rounded-md border-gray-300 shadow-sm" required>
+                                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">Tambah</button>
+                                 </form>
+                                 <ul id="subjectList" class="space-y-2"></ul>
+                            </div>
+                        </div>
+                        <!-- Schedule Management -->
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                             <h3 class="text-xl font-semibold mb-4">Jadwal Mengajar</h3>
+                             <form id="addScheduleForm" class="grid grid-cols-1 gap-4 mb-6">
+                                <div>
+                                    <label for="scheduleClass" class="block text-sm font-medium text-gray-700">Kelas</label>
+                                    <select id="scheduleClass" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></select>
+                                </div>
+                                <div>
+                                    <label for="scheduleSubject" class="block text-sm font-medium text-gray-700">Mata Pelajaran</label>
+                                    <select id="scheduleSubject" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></select>
+                                </div>
+                                <div>
+                                    <label for="scheduleTeacher" class="block text-sm font-medium text-gray-700">Guru</label>
+                                    <select id="scheduleTeacher" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></select>
+                                </div>
+                                <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">Simpan Jadwal</button>
+                             </form>
+                             <div class="max-h-96 overflow-y-auto">
+                                <table class="w-full text-left">
+                                    <thead class="sticky top-0 bg-gray-50">
+                                        <tr class="border-b">
+                                            <th class="p-2">Kelas</th>
+                                            <th class="p-2">Mata Pelajaran</th>
+                                            <th class="p-2">Guru</th>
+                                            <th class="p-2">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="scheduleTableBody"></tbody>
+                                </table>
+                             </div>
+                        </div>
+                     </div>
+                </div>
+
+                <!-- Import Content -->
+                <div id="import-content" class="tab-content hidden">
+                    <h2 class="text-2xl lg:text-3xl font-bold text-gray-800 mb-6">Import Data</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Import Siswa Card -->
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <h3 class="text-xl font-semibold mb-4">Import Data Siswa dari Excel</h3>
+                            <div class="space-y-4">
+                                 <div>
+                                    <p class="text-sm text-gray-600 mb-2">
+                                        1. Unduh template di bawah ini untuk memastikan format data benar.
+                                    </p>
+                                    <button id="downloadTemplateBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition w-full flex items-center justify-center">
+                                        <i class="fas fa-download mr-2"></i> Unduh Template Excel
+                                    </button>
+                                 </div>
+                                 <div>
+                                    <label for="studentImportFile" class="block text-sm font-medium text-gray-700">2. Pilih file Excel (.xlsx, .xls) yang sudah diisi:</label>
+                                    <input type="file" id="studentImportFile" accept=".xlsx, .xls, .csv" class="mt-1 block w-full text-sm text-gray-500
+                                      file:mr-4 file:py-2 file:px-4
+                                      file:rounded-full file:border-0
+                                      file:text-sm file:font-semibold
+                                      file:bg-cyan-50 file:text-cyan-700
+                                      hover:file:bg-cyan-100
+                                    "/>
+                                 </div>
+                                 <p id="importStatus" class="text-sm text-gray-500 h-4"></p>
+                            </div>
+                        </div>
+                         <!-- Class Management Card -->
+                         <div class="bg-white p-6 rounded-lg shadow-md">
+                            <h3 class="text-xl font-semibold mb-4">Manajemen Kelas</h3>
+                             <p class="text-sm text-gray-600 mb-4">
+                                Daftar kelas di bawah ini dibuat secara otomatis berdasarkan data siswa yang ada.
+                            </p>
+                            <div id="classList" class="mt-4 space-y-2">
+                                 <p class="text-gray-500" id="loadingClasses">Memuat daftar kelas...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+
+    <!-- Student Modal -->
+    <div id="studentModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="document.getElementById('studentModal').style.display='none'">×</span>
+            <h3 id="modalTitle" class="text-2xl font-bold mb-6">Tambah Siswa</h3>
+            <form id="studentForm">
+                <input type="hidden" id="studentId">
+                <div class="mb-4">
+                    <label for="studentName" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
+                    <input type="text" id="studentName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                </div>
+                <div class="mb-4">
+                    <label for="studentNisn" class="block text-sm font-medium text-gray-700">NISN</label>
+                    <input type="text" id="studentNisn" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                </div>
+                <div class="mb-4">
+                    <label for="studentClass" class="block text-sm font-medium text-gray-700">Kelas</label>
+                    <input type="text" id="studentClass" placeholder="Contoh: VII-A" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300" onclick="document.getElementById('studentModal').style.display='none'">Batal</button>
+                    <button type="submit" class="bg-cyan-600 text-white px-4 py-2 rounded-lg hover:bg-cyan-700">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Custom Confirmation Modal -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content text-center">
+            <h3 id="confirmTitle" class="text-xl font-semibold mb-4">Konfirmasi</h3>
+            <p id="confirmMessage" class="mb-6"></p>
+            <div class="flex justify-center space-x-4">
+                <button id="cancelBtn" class="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300">Batal</button>
+                <button id="confirmBtn" class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700">Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SheetJS for Excel processing -->
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <!-- html2pdf.js for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <!-- Firebase v8 SDK (for WebView compatibility) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <!-- Main Application Script -->
+    <script>
+        // --- FIREBASE CONFIGURATION ---
+        // Note: For Android Studio, you might replace this with a direct object
+        // or load it from a configuration file.
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "DEMO", authDomain: "DEMO", projectId: "DEMO" };
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        
+        // --- INITIALIZE FIREBASE ---
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        // Global state
+        let currentUserId = null;
+        let studentsUnsubscribe = null;
+        let gradesUnsubscribe = null;
+        let teachersUnsubscribe = null;
+        let subjectsUnsubscribe = null;
+        let schedulesUnsubscribe = null;
+        let studentCache = [];
+        let teacherCache = [];
+        let subjectCache = [];
+        let scheduleCache = [];
+
+        // --- AUTHENTICATION ---
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                console.log("User is signed in:", user.uid);
+                currentUserId = user.uid;
+                document.getElementById('userId').textContent = currentUserId;
+                document.getElementById('appId').textContent = appId;
+                initializeAppLogic(); // Initialize main app logic after auth is ready
+            } else {
+                console.log("User is not signed in. Signing in...");
+                 try {
+                    // For WebView, custom tokens might be handled differently.
+                    // Anonymous sign-in is a good fallback.
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await auth.signInWithCustomToken(__initial_auth_token);
+                    } else {
+                        await auth.signInAnonymously();
+                    }
+                } catch (error) {
+                    console.error("Error during sign-in:", error);
+                    document.getElementById('app').innerHTML = `<div class="w-full h-full flex items-center justify-center"><div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert"><strong class="font-bold">Error!</strong><span class="block sm:inline"> Gagal melakukan autentikasi. Silakan refresh halaman.</span></div></div>`;
+                }
+            }
+        });
+
+        // --- CONFIRMATION MODAL ---
+        const confirmModal = document.getElementById('confirmModal');
+        const confirmTitleEl = document.getElementById('confirmTitle');
+        const confirmMessageEl = document.getElementById('confirmMessage');
+        const confirmBtn = document.getElementById('confirmBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+
+        function showConfirmation(title, message, onConfirm) {
+            confirmTitleEl.textContent = title;
+            confirmMessageEl.textContent = message;
+            confirmModal.style.display = 'flex';
+            
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+            newConfirmBtn.addEventListener('click', () => {
+                onConfirm();
+                confirmModal.style.display = 'none';
+            });
+        }
+        cancelBtn.onclick = () => confirmModal.style.display = 'none';
+
+        // --- UI & TAB NAVIGATION ---
+        function setupNavigation() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
+            
+            const closeSidebar = () => {
+                sidebar.classList.add('-translate-x-full');
+                sidebarOverlay.classList.add('hidden');
+            };
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', e => {
+                    e.preventDefault();
+                    const tab = link.getAttribute('data-tab');
+
+                    navLinks.forEach(l => l.classList.remove('active', 'bg-cyan-50', 'text-cyan-600'));
+                    link.classList.add('active', 'bg-cyan-50', 'text-cyan-600');
+
+                    tabContents.forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    document.getElementById(`${tab}-content`).classList.remove('hidden');
+                    
+                    // Close sidebar on navigation in mobile view
+                    if (window.innerWidth < 1024) {
+                       closeSidebar();
+                    }
+                });
+            });
+            
+            hamburgerBtn.addEventListener('click', () => {
+                sidebar.classList.remove('-translate-x-full');
+                sidebarOverlay.classList.remove('hidden');
+            });
+            
+            sidebarOverlay.addEventListener('click', closeSidebar);
+        }
+        
+        // --- DASHBOARD LOGIC ---
+        function updateDashboard(students) {
+            document.getElementById('totalStudents').textContent = students.length;
+            const today = new Date().toISOString().split('T')[0];
+            const q = db.collection('artifacts').doc(appId).collection('public/data/attendance_sessions').where('date', '==', today);
+            
+            q.onSnapshot((querySnapshot) => {
+                 if (studentCache.length === 0) {
+                     document.getElementById('todayAttendance').textContent = `N/A`;
+                     return;
+                 }
+                
+                 let totalPresent = 0;
+                 let totalStudentsToday = new Set();
+                 querySnapshot.forEach(doc => {
+                     const records = doc.data().records || {};
+                     Object.keys(records).forEach(studentId => {
+                         totalStudentsToday.add(studentId);
+                         if (records[studentId] === 'Hadir') {
+                             totalPresent++;
+                         }
+                     });
+                 });
+
+                 if(totalStudentsToday.size > 0) {
+                     const percentage = Math.round((totalPresent / totalStudentsToday.size) * 100);
+                     document.getElementById('todayAttendance').textContent = `${percentage}%`;
+                 } else {
+                    document.getElementById('todayAttendance').textContent = `N/A`;
+                 }
+            });
+        }
+        
+        function updateDate() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('id-ID', options);
+        }
+
+        // --- STUDENT MANAGEMENT ---
+        function setupStudentLogic() {
+            const addStudentBtn = document.getElementById('addStudentBtn');
+            const studentModal = document.getElementById('studentModal');
+            const studentForm = document.getElementById('studentForm');
+            const modalTitle = document.getElementById('modalTitle');
+            const studentsCollection = db.collection('artifacts').doc(appId).collection('public/data/students');
+
+            document.getElementById('studentFilterClass').addEventListener('change', () => renderStudentTable());
+
+            addStudentBtn.addEventListener('click', () => {
+                studentForm.reset();
+                document.getElementById('studentId').value = '';
+                modalTitle.textContent = 'Tambah Siswa';
+                studentModal.style.display = 'flex';
+            });
+
+            studentForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id = document.getElementById('studentId').value;
+                const studentData = {
+                    name: document.getElementById('studentName').value,
+                    nisn: document.getElementById('studentNisn').value,
+                    class: document.getElementById('studentClass').value.toUpperCase(),
+                };
+
+                try {
+                    if (id) {
+                        await studentsCollection.doc(id).update(studentData);
+                    } else {
+                        await studentsCollection.add(studentData);
+                    }
+                    studentModal.style.display = 'none';
+                } catch (error) {
+                    console.error("Error saving student: ", error);
+                }
+            });
+
+            if (studentsUnsubscribe) studentsUnsubscribe();
+            studentsUnsubscribe = studentsCollection.onSnapshot((snapshot) => {
+                const students = [];
+                snapshot.forEach(doc => {
+                    students.push({ id: doc.id, ...doc.data() });
+                });
+                
+                students.sort((a, b) => a.name.localeCompare(b.name));
+                studentCache = students;
+
+                renderStudentTable();
+                populateAllClassFilters(students);
+                populateAllStudentFilters(students);
+                renderClassList(students);
+                updateDashboard(students);
+            });
+        }
+        
+        function renderStudentTable() {
+            const tableBody = document.getElementById('studentTableBody');
+            const filterClass = document.getElementById('studentFilterClass').value;
+            tableBody.innerHTML = '';
+            
+            const loadingRow = document.getElementById('loadingStudents');
+            if(loadingRow) loadingRow.remove();
+
+            const studentsToRender = (filterClass === 'all')
+                ? studentCache
+                : studentCache.filter(student => student.class === filterClass);
+
+            if (studentsToRender.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="4" class="text-center p-8 text-gray-500">Tidak ada siswa yang cocok dengan filter.</td></tr>`;
+                return;
+            }
+
+            studentsToRender.forEach(student => {
+                const row = document.createElement('tr');
+                row.className = 'border-b hover:bg-gray-50';
+                row.innerHTML = `
+                    <td class="p-4">${student.name}</td>
+                    <td class="p-4">${student.nisn}</td>
+                    <td class="p-4"><span class="bg-cyan-100 text-cyan-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">${student.class}</span></td>
+                    <td class="p-4 space-x-2">
+                        <button class="edit-btn text-blue-500 hover:text-blue-700" data-id="${student.id}"><i class="fas fa-edit"></i></button>
+                        <button class="delete-btn text-red-500 hover:text-red-700" data-id="${student.id}"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+            attachStudentActionListeners();
+        }
+
+        function attachStudentActionListeners() {
+            document.querySelectorAll('.edit-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const id = e.currentTarget.getAttribute('data-id');
+                    const student = studentCache.find(s => s.id === id);
+                    if (student) {
+                        document.getElementById('studentId').value = student.id;
+                        document.getElementById('studentName').value = student.name;
+                        document.getElementById('studentNisn').value = student.nisn;
+                        document.getElementById('studentClass').value = student.class;
+                        document.getElementById('modalTitle').textContent = 'Edit Siswa';
+                        document.getElementById('studentModal').style.display = 'flex';
+                    }
+                });
+            });
+
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const id = e.currentTarget.getAttribute('data-id');
+                    const student = studentCache.find(s => s.id === id);
+                    showConfirmation('Hapus Siswa', `Anda yakin ingin menghapus data ${student.name}?`, async () => {
+                         try {
+                            await db.collection('artifacts').doc(appId).collection('public/data/students').doc(id).delete();
+                        } catch (error) {
+                            console.error("Error deleting student: ", error);
+                        }
+                    });
+                });
+            });
+        }
+        
+        // --- ATTENDANCE LOGIC ---
+        function setupAttendanceLogic() {
+            flatpickr("#attendanceDate", { dateFormat: "Y-m-d", defaultDate: "today" });
+            document.getElementById('attendanceClass').addEventListener('change', (e) => {
+                const className = e.target.value;
+                const subjectsForClass = scheduleCache.filter(s => s.class === className);
+                populateDropdown(document.getElementById('attendanceSubject'), subjectsForClass, 'subjectId', 'subjectName');
+            });
+            document.getElementById('loadAttendanceBtn').addEventListener('click', loadAttendance);
+            document.getElementById('saveAttendanceBtn').addEventListener('click', saveAttendance);
+        }
+
+        function populateAllClassFilters(students) {
+            const classes = [...new Set(students.map(s => s.class))].sort();
+            const selectors = [
+                document.getElementById('attendanceClass'),
+                document.getElementById('reportClass'),
+                document.getElementById('gradeClass'),
+                document.getElementById('scheduleClass'),
+                document.getElementById('studentFilterClass'),
+            ];
+            selectors.forEach(select => {
+                if (!select) return;
+                const currentVal = select.value;
+                if (select.id === 'studentFilterClass') {
+                     select.innerHTML = '<option value="all">Semua Kelas</option>';
+                } else {
+                    select.innerHTML = '<option value="">Pilih Kelas</option>';
+                }
+                classes.forEach(c => {
+                    const option = document.createElement('option');
+                    option.value = c;
+                    option.textContent = c;
+                    select.appendChild(option);
+                });
+                select.value = currentVal;
+            });
+        }
+
+         function populateAllStudentFilters(students) {
+            const selectors = [
+                document.getElementById('reportStudent')
+            ];
+            selectors.forEach(select => {
+                if (!select) return;
+                const currentVal = select.value;
+                select.innerHTML = '<option value="">Pilih Siswa</option>';
+                students.forEach(s => {
+                    const option = document.createElement('option');
+                    option.value = s.id;
+                    option.textContent = `${s.name} (${s.class})`;
+                    select.appendChild(option);
+                });
+                select.value = currentVal;
+            });
+        }
+
+        function populateGradeStudentFilter(students) {
+             const select = document.getElementById('gradeStudent');
+             select.innerHTML = '<option value="">Pilih Siswa</option>';
+             students.forEach(s => {
+                const option = document.createElement('option');
+                option.value = s.id;
+                option.textContent = s.name;
+                select.appendChild(option);
+            });
+        }
+        
+        async function loadAttendance() {
+            const date = document.getElementById('attendanceDate').value;
+            const className = document.getElementById('attendanceClass').value;
+            const subjectId = document.getElementById('attendanceSubject').value;
+            const attendanceListDiv = document.getElementById('attendanceList');
+            const saveBtn = document.getElementById('saveAttendanceBtn');
+
+            if (!date || !className || !subjectId) {
+                attendanceListDiv.innerHTML = `<p class="text-center text-red-500">Harap pilih tanggal, kelas, dan mata pelajaran.</p>`;
+                saveBtn.classList.add('hidden');
+                return;
+            }
+
+            attendanceListDiv.innerHTML = `<p class="text-center text-gray-500">Memuat absensi...</p>`;
+            const studentsInClass = studentCache.filter(s => s.class === className);
+            
+            if(studentsInClass.length === 0) {
+                 attendanceListDiv.innerHTML = `<p class="text-center text-gray-500">Tidak ada siswa di kelas ini.</p>`;
+                 saveBtn.classList.add('hidden');
+                 return;
+            }
+            
+            const docId = `${date}_${className}_${subjectId}`;
+            const attendanceDocRef = db.collection('artifacts').doc(appId).collection('public/data/attendance_sessions').doc(docId);
+            const docSnap = await attendanceDocRef.get();
+            const attendanceData = docSnap.exists ? docSnap.data().records || {} : {};
+
+            let listHtml = '<div class="space-y-4">';
+            studentsInClass.forEach(student => {
+                const status = attendanceData[student.id] || 'Hadir';
+                listHtml += `
+                    <div class="grid grid-cols-1 md:grid-cols-2 items-center p-3 rounded-lg bg-gray-50 border">
+                        <p class="font-medium">${student.name}</p>
+                        <div class="flex space-x-2 md:space-x-4 justify-start md:justify-end" data-student-id="${student.id}">
+                            ${['Hadir', 'Sakit', 'Izin', 'Alpa'].map(s => `
+                                <div>
+                                    <input type="radio" id="att-${student.id}-${s}" name="att-${student.id}" value="${s}" ${status === s ? 'checked' : ''} class="peer hidden">
+                                    <label for="att-${student.id}-${s}" class="block cursor-pointer select-none rounded-md p-2 text-center text-sm font-semibold peer-checked:bg-cyan-500 peer-checked:text-white">${s}</label>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            listHtml += '</div>';
+
+            attendanceListDiv.innerHTML = listHtml;
+            saveBtn.classList.remove('hidden');
+        }
+        
+        async function saveAttendance() {
+            const date = document.getElementById('attendanceDate').value;
+            const className = document.getElementById('attendanceClass').value;
+            const subjectId = document.getElementById('attendanceSubject').value;
+            const subjectName = document.getElementById('attendanceSubject').options[document.getElementById('attendanceSubject').selectedIndex].text;
+            
+            if (!date || !className || !subjectId) {
+                alert('Form tidak lengkap.');
+                return;
+            }
+
+            const studentDivs = document.querySelectorAll('#attendanceList [data-student-id]');
+
+            const records = {};
+            studentDivs.forEach(div => {
+                const studentId = div.dataset.studentId;
+                const selectedStatus = div.querySelector('input[type="radio"]:checked');
+                if (selectedStatus) {
+                    records[studentId] = selectedStatus.value;
+                }
+            });
+
+            if (Object.keys(records).length > 0) {
+                try {
+                    const docId = `${date}_${className}_${subjectId}`;
+                    const docRef = db.collection('artifacts').doc(appId).collection('public/data/attendance_sessions').doc(docId);
+                    await docRef.set({ 
+                        date, 
+                        class: className,
+                        subjectId,
+                        subjectName,
+                        records 
+                    });
+                    alert('Absensi berhasil disimpan!');
+                } catch (error) {
+                    console.error("Error saving attendance:", error);
+                    alert('Gagal menyimpan absensi.');
+                }
+            }
+        }
+        
+        // --- GRADES LOGIC ---
+        function setupGradesLogic() {
+            document.getElementById('gradeClass').addEventListener('change', () => {
+                const selectedClass = document.getElementById('gradeClass').value;
+                document.getElementById('gradeManagementSection').classList.add('hidden');
+                if (selectedClass) {
+                    const studentsInClass = studentCache.filter(s => s.class === selectedClass);
+                    populateGradeStudentFilter(studentsInClass);
+                } else {
+                    populateGradeStudentFilter([]);
+                }
+                 document.getElementById('gradeStudent').value = '';
+            });
+
+            document.getElementById('gradeStudent').addEventListener('change', loadGradesForStudent);
+            document.getElementById('saveGradeBtn').addEventListener('click', saveGrade);
+        }
+
+        function loadGradesForStudent() {
+            const studentId = document.getElementById('gradeStudent').value;
+            const gradeSection = document.getElementById('gradeManagementSection');
+            
+            if (gradesUnsubscribe) gradesUnsubscribe();
+
+            if (!studentId) {
+                gradeSection.classList.add('hidden');
+                return;
+            }
+
+            const student = studentCache.find(s => s.id === studentId);
+            document.getElementById('selectedStudentForGrade').textContent = `Nilai untuk: ${student.name}`;
+            gradeSection.classList.remove('hidden');
+            
+            const gradesCollection = db.collection('artifacts').doc(appId).collection('public/data/students').doc(studentId).collection('grades');
+            gradesUnsubscribe = gradesCollection.onSnapshot((snapshot) => {
+                const grades = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderGradesTable(grades, studentId);
+            });
+        }
+        
+        function renderGradesTable(grades, studentId) {
+            const tableBody = document.getElementById('gradesTableBody');
+            tableBody.innerHTML = (grades.length === 0) 
+                ? `<tr><td colspan="4" class="p-4 text-center text-gray-500">Belum ada nilai.</td></tr>`
+                : grades.map(grade => `
+                    <tr class="border-b">
+                        <td class="p-2 font-semibold">${grade.subject}</td>
+                        <td class="p-2">${grade.type}</td>
+                        <td class="p-2 text-lg font-bold ${grade.value >= 75 ? 'text-green-600' : 'text-red-600'}">${grade.value}</td>
+                        <td class="p-2">
+                            <button class="delete-grade-btn text-red-500 hover:text-red-700" data-student-id="${studentId}" data-grade-id="${grade.id}"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>
+                  `).join('');
+            
+            attachGradeActionListeners();
+        }
+
+        function attachGradeActionListeners() {
+            document.querySelectorAll('.delete-grade-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const studentId = e.currentTarget.dataset.studentId;
+                    const gradeId = e.currentTarget.dataset.gradeId;
+                    showConfirmation('Hapus Nilai', 'Anda yakin ingin menghapus nilai ini?', async () => {
+                         try {
+                            await db.collection('artifacts').doc(appId).collection('public/data/students').doc(studentId).collection('grades').doc(gradeId).delete();
+                        } catch (error) {
+                            console.error("Error deleting grade: ", error);
+                        }
+                    });
+                });
+            });
+        }
+
+        async function saveGrade() {
+            const studentId = document.getElementById('gradeStudent').value;
+            const subject = document.getElementById('gradeSubject').value;
+            const type = document.getElementById('gradeType').value.trim();
+            const value = document.getElementById('gradeValue').value;
+
+            if (!studentId || !subject || !type || value === '') {
+                alert('Harap isi semua kolom nilai.');
+                return;
+            }
+
+            try {
+                const gradesCollection = db.collection('artifacts').doc(appId).collection('public/data/students').doc(studentId).collection('grades');
+                await gradesCollection.add({ subject, type, value: Number(value) });
+                
+                document.getElementById('gradeType').value = '';
+                document.getElementById('gradeValue').value = '';
+
+            } catch(error) {
+                console.error("Error saving grade: ", error);
+                alert('Gagal menyimpan nilai.');
+            }
+        }
+        
+        // --- IMPORT & CLASS MANAGEMENT LOGIC ---
+        function setupImportLogic() {
+            document.getElementById('downloadTemplateBtn').addEventListener('click', downloadTemplate);
+            document.getElementById('studentImportFile').addEventListener('change', handleFileImport);
+        }
+
+        function downloadTemplate() {
+            const templateData = [['Nama Lengkap', 'NISN', 'Kelas'], ['Contoh Nama Siswa', '1234567890', 'VII-A']];
+            const worksheet = XLSX.utils.aoa_to_sheet(templateData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Template Siswa');
+            XLSX.writeFile(workbook, 'template_data_siswa.xlsx');
+        }
+
+        function handleFileImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const statusEl = document.getElementById('importStatus');
+            statusEl.textContent = 'Membaca file...';
+            const reader = new FileReader();
+
+            reader.onload = async (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    
+                    if (jsonData.length < 2) {
+                        throw new Error("File Excel kosong atau hanya berisi header.");
+                    }
+
+                    statusEl.textContent = 'Memproses data...';
+                    const batch = db.batch();
+                    let importedCount = 0;
+                    
+                    for (let i = 1; i < jsonData.length; i++) {
+                        const row = jsonData[i];
+                        const [name, nisn, studentClass] = row.map(cell => String(cell || '').trim());
+
+                        if (name && nisn && studentClass) {
+                            const newStudentRef = db.collection('artifacts').doc(appId).collection('public/data/students').doc();
+                            batch.set(newStudentRef, { name, nisn, class: studentClass.toUpperCase() });
+                            importedCount++;
+                        }
+                    }
+
+                    if (importedCount === 0) {
+                        throw new Error("Tidak ada data siswa yang valid untuk diimpor dari file.");
+                    }
+
+                    await batch.commit();
+                    statusEl.textContent = `Berhasil! ${importedCount} siswa telah diimpor.`;
+                    alert(`Berhasil! ${importedCount} siswa telah diimpor.`);
+                } catch (error) {
+                    console.error("Error importing from Excel: ", error);
+                    statusEl.textContent = `Error: ${error.message}`;
+                    alert(`Gagal mengimpor file. Pastikan format sudah benar. Error: ${error.message}`);
+                } finally {
+                    event.target.value = ''; 
+                    setTimeout(() => { statusEl.textContent = ''; }, 5000);
+                }
+            };
+
+            reader.onerror = () => {
+                statusEl.textContent = 'Gagal membaca file.';
+                alert('Gagal membaca file.');
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+        
+        function renderClassList(students) {
+            const classListDiv = document.getElementById('classList');
+            document.getElementById('loadingClasses')?.remove();
+            const classes = [...new Set(students.map(s => s.class))].sort();
+
+            if (classes.length === 0) {
+                classListDiv.innerHTML = '<p class="text-gray-500">Belum ada kelas yang terdaftar.</p>';
+                return;
+            }
+
+            classListDiv.innerHTML = classes.map(c => 
+                `<div class="flex items-center justify-between p-3 bg-gray-100 rounded-md">
+                    <span class="font-medium text-gray-800">${c}</span>
+                    <span class="text-sm text-gray-500">${students.filter(s => s.class === c).length} siswa</span>
+                </div>`
+            ).join('');
+        }
+
+        // --- SETTINGS LOGIC ---
+        function setupSettingsLogic() {
+            // Teacher Management
+            const addTeacherForm = document.getElementById('addTeacherForm');
+            addTeacherForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const teacherNameInput = document.getElementById('teacherName');
+                const name = teacherNameInput.value.trim();
+                if (name) {
+                    await db.collection('artifacts').doc(appId).collection('public/data/teachers').add({ name });
+                    teacherNameInput.value = '';
+                }
+            });
+
+            if(teachersUnsubscribe) teachersUnsubscribe();
+            teachersUnsubscribe = db.collection('artifacts').doc(appId).collection('public/data/teachers').onSnapshot((snapshot) => {
+                teacherCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                teacherCache.sort((a,b) => a.name.localeCompare(b.name));
+                renderList(document.getElementById('teacherList'), teacherCache, 'teachers', 'name');
+                populateDropdown(document.getElementById('scheduleTeacher'), teacherCache, 'id', 'name');
+            });
+
+            // Subject Management
+            const addSubjectForm = document.getElementById('addSubjectForm');
+            addSubjectForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const subjectNameInput = document.getElementById('subjectName');
+                const name = subjectNameInput.value.trim();
+                if (name) {
+                    await db.collection('artifacts').doc(appId).collection('public/data/subjects').add({ name });
+                    subjectNameInput.value = '';
+                }
+            });
+            
+            if(subjectsUnsubscribe) subjectsUnsubscribe();
+            subjectsUnsubscribe = db.collection('artifacts').doc(appId).collection('public/data/subjects').onSnapshot((snapshot) => {
+                subjectCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                subjectCache.sort((a,b) => a.name.localeCompare(b.name));
+                renderList(document.getElementById('subjectList'), subjectCache, 'subjects', 'name');
+                populateDropdown(document.getElementById('scheduleSubject'), subjectCache, 'id', 'name');
+                populateDropdown(document.getElementById('gradeSubject'), subjectCache, 'name', 'name');
+            });
+
+            // Schedule Management
+            const addScheduleForm = document.getElementById('addScheduleForm');
+            addScheduleForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const scheduleData = {
+                    class: document.getElementById('scheduleClass').value,
+                    subjectId: document.getElementById('scheduleSubject').value,
+                    teacherId: document.getElementById('scheduleTeacher').value
+                };
+                 if (scheduleData.class && scheduleData.subjectId && scheduleData.teacherId) {
+                    await db.collection('artifacts').doc(appId).collection('public/data/schedules').add(scheduleData);
+                } else {
+                    alert('Harap lengkapi semua kolom jadwal.');
+                }
+            });
+
+            if(schedulesUnsubscribe) schedulesUnsubscribe();
+            schedulesUnsubscribe = db.collection('artifacts').doc(appId).collection('public/data/schedules').onSnapshot((snapshot) => {
+                scheduleCache = snapshot.docs.map(doc => {
+                    const data = doc.data();
+                    const teacher = teacherCache.find(t => t.id === data.teacherId) || {name: 'N/A'};
+                    const subject = subjectCache.find(s => s.id === data.subjectId) || {name: 'N/A'};
+                    return { id: doc.id, ...data, teacherName: teacher.name, subjectName: subject.name };
+                });
+                renderScheduleTable(scheduleCache);
+            });
+        }
+
+        function renderList(ulElement, items, collectionName, propertyName) {
+            ulElement.innerHTML = '';
+            if(items.length === 0) {
+                 ulElement.innerHTML = `<li class="text-gray-500 text-sm">Belum ada data.</li>`;
+            }
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'flex justify-between items-center p-2 bg-gray-50 rounded-md';
+                li.innerHTML = `<span>${item[propertyName]}</span>
+                                <button data-id="${item.id}" class="delete-setting-btn text-red-400 hover:text-red-600"><i class="fas fa-trash-alt"></i></button>`;
+                li.querySelector('.delete-setting-btn').addEventListener('click', async (e) => {
+                    const id = e.currentTarget.dataset.id;
+                    await db.collection('artifacts').doc(appId).collection('public/data').doc(collectionName).collection(id).delete();
+                });
+                ulElement.appendChild(li);
+            });
+        }
+        
+        function renderScheduleTable(schedules) {
+            const tableBody = document.getElementById('scheduleTableBody');
+            tableBody.innerHTML = '';
+             if(schedules.length === 0) {
+                 tableBody.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-gray-500">Belum ada jadwal.</td></tr>`;
+            }
+            schedules.forEach(schedule => {
+                const row = document.createElement('tr');
+                row.className = 'border-b';
+                row.innerHTML = `<td class="p-2">${schedule.class}</td>
+                                 <td class="p-2">${schedule.subjectName}</td>
+                                 <td class="p-2">${schedule.teacherName}</td>
+                                 <td class="p-2"><button data-id="${schedule.id}" class="delete-setting-btn text-red-400 hover:text-red-600"><i class="fas fa-trash-alt"></i></button></td>`;
+                row.querySelector('.delete-setting-btn').addEventListener('click', async (e) => {
+                    const id = e.currentTarget.dataset.id;
+                    await db.collection('artifacts').doc(appId).collection('public/data').doc('schedules').collection(id).delete();
+                });
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function populateDropdown(selectElement, items, valueKey, textKey) {
+            const currentVal = selectElement.value;
+            selectElement.innerHTML = `<option value="">Pilih</option>`;
+            items.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item[valueKey];
+                option.textContent = item[textKey];
+                selectElement.appendChild(option);
+            });
+            selectElement.value = currentVal;
+        }
+        
+        // --- REPORTS LOGIC ---
+        function setupReportsLogic() {
+            const today = new Date();
+            const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+            flatpickr("#reportStartDate", { dateFormat: "Y-m-d", defaultDate: firstDayOfMonth });
+            flatpickr("#reportEndDate", { dateFormat: "Y-m-d", defaultDate: "today" });
+
+            document.getElementById('reportType').addEventListener('change', updateReportFilters);
+            
+            document.getElementById('generateReportBtn').addEventListener('click', generateReport);
+            document.getElementById('printReportBtn').addEventListener('click', () => window.print());
+            document.getElementById('exportExcelBtn').addEventListener('click', exportToExcel);
+            document.getElementById('exportPdfBtn').addEventListener('click', exportToPDF);
+            
+            updateReportFilters(); // Initial setup
+        }
+
+        function updateReportFilters() {
+            const type = document.getElementById('reportType').value;
+            const classFilter = document.getElementById('filter-class-container');
+            const studentFilter = document.getElementById('filter-student-container');
+            const dateRangeFilter = document.getElementById('filter-date-range-container');
+
+            classFilter.classList.add('hidden');
+            studentFilter.classList.add('hidden');
+            dateRangeFilter.classList.add('hidden');
+
+            switch(type) {
+                case 'attendance_class':
+                case 'attendance_analysis':
+                    classFilter.classList.remove('hidden');
+                    dateRangeFilter.classList.remove('hidden');
+                    break;
+                case 'attendance_student':
+                    studentFilter.classList.remove('hidden');
+                    dateRangeFilter.classList.remove('hidden');
+                    break;
+                case 'grades_class':
+                case 'grades_analysis':
+                    classFilter.classList.remove('hidden');
+                    break;
+                case 'grades_student':
+                    studentFilter.classList.remove('hidden');
+                    break;
+            }
+        }
+        
+        function exportToExcel() {
+            const reportOutput = document.getElementById('report-output');
+            const reportTitleEl = reportOutput.querySelector('h4');
+            const reportTable = reportOutput.querySelector('table');
+
+            if (!reportTable || !reportTitleEl) {
+                alert('Tidak ada data laporan berbentuk tabel untuk diekspor.');
+                return;
+            }
+            
+            const title = reportTitleEl.textContent.replace(/ /g, '_').replace(/[:/]/g, '');
+            const fileName = `${title}.xlsx`;
+
+            const wb = XLSX.utils.table_to_book(reportTable, { sheet: "Laporan" });
+            XLSX.writeFile(wb, fileName);
+        }
+
+        function exportToPDF() {
+            const reportOutput = document.getElementById('report-output');
+            const reportTitleEl = reportOutput.querySelector('h4');
+
+            if (!reportOutput.children.length || !reportTitleEl) {
+                alert('Tidak ada data laporan untuk diekspor.');
+                return;
+            }
+            
+            const title = reportTitleEl.textContent.replace(/ /g, '_').replace(/[:/]/g, '');
+            const fileName = `${title}.pdf`;
+            
+            const opt = {
+                margin:       0.5,
+                filename:     fileName,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(reportOutput).save();
+        }
+
+        async function generateReport() {
+            const type = document.getElementById('reportType').value;
+            const outputContainer = document.getElementById('report-output-container');
+            const outputDiv = document.getElementById('report-output');
+            const exportButtons = document.getElementById('export-buttons-container');
+
+            outputDiv.innerHTML = `<p class="text-center text-gray-500 p-8">Membuat laporan, mohon tunggu...</p>`;
+            outputContainer.classList.remove('hidden');
+            
+            if (type.includes('analysis')) {
+                exportButtons.classList.add('hidden');
+            } else {
+                exportButtons.classList.remove('hidden');
+            }
+
+            switch(type) {
+                case 'attendance_class':
+                    await generateAttendanceReportPerClass(outputDiv);
+                    break;
+                case 'attendance_student':
+                    await generateAttendanceReportPerStudent(outputDiv);
+                    break;
+                case 'grades_class':
+                    await generateGradesReportPerClass(outputDiv);
+                    break;
+                case 'grades_student':
+                    await generateGradesReportPerStudent(outputDiv);
+                    break;
+                case 'attendance_analysis':
+                    await generateAttendanceAnalysis(outputDiv);
+                    break;
+                case 'grades_analysis':
+                    await generateGradesAnalysis(outputDiv);
+                    break;
+            }
+        }
+        
+        async function generateAttendanceAnalysis(outputDiv) {
+            const className = document.getElementById('reportClass').value;
+            const startDate = document.getElementById('reportStartDate').value;
+            const endDate = document.getElementById('reportEndDate').value;
+
+            document.getElementById('reportTitleHeader').textContent = `Analisis Absensi: Kelas ${className}`;
+
+            if (!className || !startDate || !endDate) {
+                outputDiv.innerHTML = `<p class="text-center text-red-500 p-8">Harap pilih kelas dan rentang tanggal terlebih dahulu.</p>`;
+                return;
+            }
+            
+            const studentsInClass = studentCache.filter(s => s.class === className);
+            const attendanceCollection = db.collection('artifacts').doc(appId).collection('public/data/attendance_sessions');
+            const q = attendanceCollection.where('class', '==', className);
+            const querySnapshot = await q.get();
+            
+            const attendanceDocs = querySnapshot.docs
+                .map(doc => doc.data())
+                .filter(doc => doc.date >= startDate && doc.date <= endDate);
+            
+            if (attendanceDocs.length === 0) {
+                 outputDiv.innerHTML = `<p class="text-center text-gray-500 p-8">Tidak ada data absensi untuk dianalisis pada periode ini.</p>`;
+                 return;
+            }
+
+            const studentStats = {};
+            studentsInClass.forEach(s => studentStats[s.id] = { name: s.name, Hadir: 0, Sakit: 0, Izin: 0, Alpa: 0 });
+
+            attendanceDocs.forEach(doc => {
+                Object.entries(doc.records).forEach(([studentId, status]) => {
+                    if (studentStats[studentId]) {
+                        studentStats[studentId][status]++;
+                    }
+                });
+            });
+            
+            const totalRecords = Object.values(studentStats).reduce((acc, curr) => acc + curr.Hadir + curr.Sakit + curr.Izin + curr.Alpa, 0);
+            const totalHadir = Object.values(studentStats).reduce((acc, curr) => acc + curr.Hadir, 0);
+            const overallAttendanceRate = totalRecords > 0 ? ((totalHadir / totalRecords) * 100).toFixed(1) : 0;
+            
+            const topAttendance = Object.values(studentStats).sort((a,b) => b.Hadir - a.Hadir).slice(0, 3);
+            const mostAlpa = Object.values(studentStats).sort((a,b) => b.Alpa - a.Alpa).filter(s => s.Alpa > 0).slice(0, 3);
+            
+            outputDiv.innerHTML = `
+                <h4 class="text-lg font-bold mb-1">Analisis Absensi Kelas ${className}</h4>
+                <p class="mb-6 text-sm text-gray-600">Periode: ${startDate} s/d ${endDate}</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                     <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg text-center">
+                        <p class="text-sm text-blue-700">Rata-rata Kehadiran</p>
+                        <p class="text-3xl font-bold text-blue-800">${overallAttendanceRate}%</p>
+                    </div>
+                     <div class="bg-green-50 border border-green-200 p-4 rounded-lg">
+                        <h5 class="font-semibold text-green-800 mb-2 text-center">Kehadiran Tertinggi</h5>
+                        <ul class="list-decimal list-inside text-sm text-green-700">
+                            ${topAttendance.map(s => `<li>${s.name} (${s.Hadir} kali)</li>`).join('') || '<li class="list-none">Tidak ada data</li>'}
+                        </ul>
+                    </div>
+                     <div class="bg-red-50 border border-red-200 p-4 rounded-lg">
+                        <h5 class="font-semibold text-red-800 mb-2 text-center">Alpa Terbanyak</h5>
+                         <ul class="list-decimal list-inside text-sm text-red-700">
+                            ${mostAlpa.map(s => `<li>${s.name} (${s.Alpa} kali)</li>`).join('') || '<li class="list-none">Tidak ada data</li>'}
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+        
+         async function generateGradesAnalysis(outputDiv) {
+            const className = document.getElementById('reportClass').value;
+            if(!className) {
+                outputDiv.innerHTML = `<p class="text-center text-red-500 p-8">Harap pilih kelas terlebih dahulu.</p>`;
+                return;
+            }
+
+            document.getElementById('reportTitleHeader').textContent = `Analisis Nilai: Kelas ${className}`;
+            const studentsInClass = studentCache.filter(s => s.class === className);
+
+            let allGrades = [];
+            const subjectGrades = {};
+
+            for (const student of studentsInClass) {
+                const gradesCollection = db.collection('artifacts').doc(appId).collection('public/data/students').doc(student.id).collection('grades');
+                const gradesSnapshot = await gradesCollection.get();
+                gradesSnapshot.forEach(doc => {
+                    const gradeData = doc.data();
+                    allGrades.push(gradeData.value);
+                    if (!subjectGrades[gradeData.subject]) {
+                        subjectGrades[gradeData.subject] = [];
+                    }
+                    subjectGrades[gradeData.subject].push(gradeData.value);
+                });
+            }
+
+            if (allGrades.length === 0) {
+                outputDiv.innerHTML = `<p class="text-center text-gray-500 p-8">Tidak ada data nilai untuk dianalisis di kelas ini.</p>`;
+                return;
+            }
+            
+            const classAverage = (allGrades.reduce((a, b) => a + b, 0) / allGrades.length).toFixed(1);
+            const highestScore = Math.max(...allGrades);
+            const lowestScore = Math.min(...allGrades);
+
+            const subjectAverages = Object.entries(subjectGrades).map(([subject, grades]) => ({
+                subject,
+                average: (grades.reduce((a, b) => a + b, 0) / grades.length).toFixed(1)
+            }));
+            
+            outputDiv.innerHTML = `
+                <h4 class="text-lg font-bold mb-1">Analisis Nilai Kelas ${className}</h4>
+                <p class="mb-6 text-sm text-gray-600">Berdasarkan semua data nilai yang tersimpan.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg text-center">
+                        <p class="text-sm text-blue-700">Rata-rata Kelas</p>
+                        <p class="text-3xl font-bold text-blue-800">${classAverage}</p>
+                    </div>
+                    <div class="bg-green-50 border border-green-200 p-4 rounded-lg text-center">
+                        <p class="text-sm text-green-700">Nilai Tertinggi</p>
+                        <p class="text-3xl font-bold text-green-800">${highestScore}</p>
+                    </div>
+                    <div class="bg-red-50 border border-red-200 p-4 rounded-lg text-center">
+                        <p class="text-sm text-red-700">Nilai Terendah</p>
+                        <p class="text-3xl font-bold text-red-800">${lowestScore}</p>
+                    </div>
+                </div>
+                <div>
+                    <h5 class="font-semibold text-md mb-2">Rata-rata per Mata Pelajaran</h5>
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-100"><th class="border px-4 py-2">Mata Pelajaran</th><th class="border px-4 py-2 text-center">Nilai Rata-rata</th></tr>
+                        </thead>
+                        <tbody>
+                            ${subjectAverages.map(item => `<tr><td class="border px-4 py-2">${item.subject}</td><td class="border px-4 py-2 text-center">${item.average}</td></tr>`).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+
+        async function generateAttendanceReportPerClass(outputDiv) {
+            const className = document.getElementById('reportClass').value;
+            const startDate = document.getElementById('reportStartDate').value;
+            const endDate = document.getElementById('reportEndDate').value;
+
+            document.getElementById('reportTitleHeader').textContent = `Laporan Absensi: Kelas ${className}`;
+
+            if (!className || !startDate || !endDate) {
+                outputDiv.innerHTML = `<p class="text-center text-red-500 p-8">Harap pilih kelas dan rentang tanggal terlebih dahulu.</p>`;
+                return;
+            }
+
+            const studentsInClass = studentCache.filter(s => s.class === className);
+            const attendanceCollectionRef = db.collection('artifacts').doc(appId).collection('public/data/attendance_sessions');
+            const q = attendanceCollectionRef.where('class', '==', className);
+            
+            const querySnapshot = await q.get();
+            const attendanceDocs = querySnapshot.docs
+                .map(doc => doc.data())
+                .filter(doc => doc.date >= startDate && doc.date <= endDate);
+
+            const reportData = studentsInClass.map(student => {
+                const stats = { 'Hadir': 0, 'Sakit': 0, 'Izin': 0, 'Alpa': 0 };
+                attendanceDocs.forEach(doc => {
+                    if (doc.records && doc.records[student.id]) {
+                        stats[doc.records[student.id]]++;
+                    }
+                });
+                return { name: student.name, stats };
+            });
+
+            const tableRows = reportData.map((row, index) => `
+                <tr>
+                    <td class="border px-4 py-2">${index + 1}</td>
+                    <td class="border px-4 py-2">${row.name}</td>
+                    <td class="border px-4 py-2 text-center">${row.stats.Hadir}</td>
+                    <td class="border px-4 py-2 text-center">${row.stats.Sakit}</td>
+                    <td class="border px-4 py-2 text-center">${row.stats.Izin}</td>
+                    <td class="border px-4 py-2 text-center">${row.stats.Alpa}</td>
+                </tr>
+            `).join('');
+
+            outputDiv.innerHTML = `
+                <h4 class="text-lg font-bold mb-1">Laporan Absensi Kelas ${className}</h4>
+                <p class="mb-4 text-sm text-gray-600">Periode: ${startDate} s/d ${endDate}</p>
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="border px-4 py-2">No</th>
+                            <th class="border px-4 py-2">Nama Siswa</th>
+                            <th class="border px-4 py-2 text-center">Hadir</th>
+                            <th class="border px-4 py-2 text-center">Sakit</th>
+                            <th class="border px-4 py-2 text-center">Izin</th>
+                            <th class="border px-4 py-2 text-center">Alpa</th>
+                        </tr>
+                    </thead>
+                    <tbody>${tableRows}</tbody>
+                </table>
+            `;
+        }
+        
+        async function generateAttendanceReportPerStudent(outputDiv) {
+            const studentId = document.getElementById('reportStudent').value;
+            const startDate = document.getElementById('reportStartDate').value;
+            const endDate = document.getElementById('reportEndDate').value;
+
+            if (!studentId || !startDate || !endDate) {
+                outputDiv.innerHTML = `<p class="text-center text-red-500 p-8">Harap pilih siswa dan rentang tanggal terlebih dahulu.</p>`;
+                return;
+            }
+            
+            const student = studentCache.find(s => s.id === studentId);
+            document.getElementById('reportTitleHeader').textContent = `Laporan Absensi: ${student.name}`;
+
+            const attendanceCollectionRef = db.collection('artifacts').doc(appId).collection('public/data/attendance_sessions');
+            const q = attendanceCollectionRef.where('date', '>=', startDate).where('date', '<=', endDate);
+            const querySnapshot = await q.get();
+
+            const reportData = [];
+            querySnapshot.forEach(doc => {
+                if(doc.data().records && doc.data().records[studentId]){
+                    reportData.push({ date: doc.id, status: doc.data().records[studentId], subject: doc.data().subjectName });
+                }
+            });
+            reportData.sort((a,b) => a.date.localeCompare(b.date)); // sort by date
+
+             const tableRows = reportData.map(row => `
+                <tr>
+                    <td class="border px-4 py-2">${row.date.split('_')[0]}</td>
+                    <td class="border px-4 py-2">${row.subject}</td>
+                    <td class="border px-4 py-2">${row.status}</td>
+                </tr>
+            `).join('');
+
+            outputDiv.innerHTML = `
+                <h4 class="text-lg font-bold mb-1">Laporan Absensi: ${student.name} (${student.class})</h4>
+                <p class="mb-4 text-sm text-gray-600">Periode: ${startDate} s/d ${endDate}</p>
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="border px-4 py-2">Tanggal</th>
+                            <th class="border px-4 py-2">Mata Pelajaran</th>
+                            <th class="border px-4 py-2">Keterangan</th>
+                        </tr>
+                    </thead>
+                    <tbody>${tableRows.length > 0 ? tableRows : '<tr><td colspan="3" class="text-center p-4 border">Tidak ada data absensi pada periode ini.</td></tr>'}</tbody>
+                </table>
+            `;
+        }
+
+        async function generateGradesReportPerClass(outputDiv) {
+            const className = document.getElementById('reportClass').value;
+            if(!className) {
+                outputDiv.innerHTML = `<p class="text-center text-red-500 p-8">Harap pilih kelas terlebih dahulu.</p>`;
+                return;
+            }
+
+            document.getElementById('reportTitleHeader').textContent = `Laporan Nilai: Kelas ${className}`;
+            const studentsInClass = studentCache.filter(s => s.class === className);
+            
+            let html = `<h4 class="text-lg font-bold mb-4">Laporan Nilai Kelas ${className}</h4>`;
+
+            for (const student of studentsInClass) {
+                const gradesCollection = db.collection('artifacts').doc(appId).collection('public/data/students').doc(student.id).collection('grades');
+                const gradesSnapshot = await gradesCollection.get();
+                const grades = gradesSnapshot.docs.map(doc => doc.data());
+                
+                html += `<div class="mb-6 page-break-after">
+                            <h5 class="font-semibold text-md mb-2">${student.name}</h5>`;
+
+                if (grades.length > 0) {
+                     const tableRows = grades.map(grade => `
+                        <tr>
+                            <td class="border px-4 py-2">${grade.subject}</td>
+                            <td class="border px-4 py-2">${grade.type}</td>
+                            <td class="border px-4 py-2 text-center">${grade.value}</td>
+                        </tr>
+                    `).join('');
+                    html += `<table class="w-full text-left border-collapse text-sm">
+                                <thead>
+                                    <tr class="bg-gray-100"><th class="border px-4 py-2">Mapel</th><th class="border px-4 py-2">Jenis</th><th class="border px-4 py-2 text-center">Nilai</th></tr>
+                                </thead>
+                                <tbody>${tableRows}</tbody>
+                             </table>`;
+                } else {
+                    html += `<p class="text-sm text-gray-500">Belum ada data nilai.</p>`;
+                }
+                html += `</div>`;
+            }
+
+            outputDiv.innerHTML = html;
+        }
+        
+        async function generateGradesReportPerStudent(outputDiv) {
+            const studentId = document.getElementById('reportStudent').value;
+            if(!studentId) {
+                outputDiv.innerHTML = `<p class="text-center text-red-500 p-8">Harap pilih siswa terlebih dahulu.</p>`;
+                return;
+            }
+
+            const student = studentCache.find(s => s.id === studentId);
+            document.getElementById('reportTitleHeader').textContent = `Laporan Nilai: ${student.name}`;
+            const gradesCollection = db.collection('artifacts').doc(appId).collection('public/data/students').doc(studentId).collection('grades');
+            const gradesSnapshot = await gradesCollection.get();
+            const grades = gradesSnapshot.docs.map(doc => doc.data());
+
+             const tableRows = grades.map(grade => `
+                <tr>
+                    <td class="border px-4 py-2">${grade.subject}</td>
+                    <td class="border px-4 py-2">${grade.type}</td>
+                    <td class="border px-4 py-2 text-center">${grade.value}</td>
+                </tr>
+            `).join('');
+
+            outputDiv.innerHTML = `
+                <h4 class="text-lg font-bold mb-1">Laporan Nilai: ${student.name}</h4>
+                <p class="mb-4 text-sm text-gray-600">Kelas: ${student.class}</p>
+                 <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="border px-4 py-2">Mata Pelajaran</th>
+                            <th class="border px-4 py-2">Jenis Nilai</th>
+                            <th class="border px-4 py-2 text-center">Nilai</th>
+                        </tr>
+                    </thead>
+                    <tbody>${tableRows.length > 0 ? tableRows : '<tr><td colspan="3" class="text-center p-4 border">Belum ada data nilai.</td></tr>'}</tbody>
+                </table>
+            `;
+        }
+
+        // --- APP INITIALIZATION ---
+        function initializeAppLogic() {
+            if (!currentUserId) {
+                console.log("Waiting for auth to be ready...");
+                return;
+            }
+            console.log("Auth is ready. Initializing app logic.");
+            setupNavigation();
+            updateDate();
+            setupStudentLogic();
+            setupAttendanceLogic();
+            setupGradesLogic();
+            setupImportLogic(); 
+            setupReportsLogic();
+            setupSettingsLogic();
+        }
+
+        // Start the application logic once the DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+             // The auth listener will trigger initializeAppLogic()
+        });
+    </script>
+    
+    <!-- Flatpickr JS (Date Picker) -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
+    <script>
+         // Make Indonesian locale available for Flatpickr
+        flatpickr.localize(flatpickr.l10ns.id);
+    </script>
+</body>
+</html>
